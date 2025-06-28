@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel Firestore - CRUD</title>
+  <script src="https://apis.google.com/js/api.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    input, textarea, button, select { margin: 5px 0; padding: 5px; width: 100%; }
+    .doc-card { border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px 0; }
+    .doc-actions { display: flex; gap: 10px; margin-top: 10px; }
+    pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h2>🔐 Login com Google para acessar o Firestore</h2>
+  <button onclick="handleAuthClick()">Login com Google</button>
+  <button onclick="handleSignoutClick()">Logout</button>
+  <p id="auth-status">Status: Desconectado</p>
+
+  <h2>📂 Nome da Coleção</h2>
+  <input type="text" id="collectionName" placeholder="Ex: categoriaEmpresa">
+  <button onclick="listarDocumentos()">Listar Documentos</button>
+
+  <h2>📄 Inserir Novo Documento</h2>
+  <textarea id="novoDocumento" rows="6" placeholder='Ex: { "nomeCategoria": "Exemplo", "ativo": true }'></textarea>
+  <button onclick="criarDocumento()">Inserir</button>
+
+  <h2>📋 Documentos</h2>
+  <div id="documentos"></div>
+
+  <script>
+    const CLIENT_ID = '1057061768161-ki1s6p1545rvcq74hs74ffeajfmb4bd3.apps.googleusercontent.com';
+    const PROJECT_ID = 'appgoola';
+    let accessToken = null;
+
+    function initClient() {
+      gapi.load('client:auth2', () => {
+        gapi.auth2.init({
+          client_id: CLIENT_ID,
+          scope: 'https://www.googleapis.com/auth/datastore'
+        }).then(() => {
+          const authInstance = gapi.auth2.getAuthInstance();
+          updateSigninStatus(authInstance.isSignedIn.get());
+          authInstance.isSignedIn.listen(updateSigninStatus);
+        });
+      });
+    }
+
+    function updateSigninStatus(isSignedIn) {
+      document.getElementById('auth-status').textContent = 'Status: ' + (isSignedIn ? 'Conectado' : 'Desconectado');
+      if (isSignedIn) {
+        accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
+      }
+    }
+
+    function handleAuthClick() {
+      gapi.auth2.getAuthInstance().signIn();
+    }
+
+    function handleSignoutClick() {
+      gapi.auth2.getAuthInstance().signOut();
+    }
+
+    async function listarDocumentos() {
+      const collection = document.getElementById('collectionName').value;
+      const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/${collection}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const data = await res.json();
+      const container = document.getElementById('documentos');
+      container.innerHTML = '';
+      if (!data.documents) return container.innerText = 'Nenhum documento encontrado';
+
+      data.documents.forEach(doc => {
+        const id = doc.name.split('/').pop();
+        const campos = JSON.stringify(parseFirestoreFields(doc.fields), null, 2);
+        container.innerHTML += `
+          <div class="doc-card">
+            <strong>ID:</strong> ${id}<br>
+            <textarea rows="6" id="edit-${id}">${campos}</textarea>
+            <div class="doc-actions">
+              <button onclick="atualizarDocumento('${collection}', '${id}')">Atualizar</button>
+              <button onclick="deletarDocumento('${collection}', '${id}')">Deletar</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function parseFirestoreFields(fields) {
+      const obj = {};
+      for (const [k, v] of Object.entries(fields)) {
+        const tipo = Object.keys(v)[0];
+        obj[k] = v[tipo];
+      }
+      return obj;
+    }
+
+    function buildFirestoreFields(jsonObj) {
+      const fields = {};
+      for (const [k, v] of Object.entries(jsonObj)) {
+        if (typeof v === 'boolean') fields[k] = { booleanValue: v };
+        else if (typeof v === 'number') fields[k] = { integerValue: String(v) };
+        else fields[k] = { stringValue: String(v) };
+      }
+      return { fields };
+    }
+
+    async function criarDocumento() {
+      const collection = document.getElementById('collectionName').value;
+      const docStr = document.getElementById('novoDocumento').value;
+      try {
+        const doc = JSON.parse(docStr);
+        const body = buildFirestoreFields(doc);
+        const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/${collection}`;
+        await fetch(url, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+        listarDocumentos();
+      } catch (e) {
+        alert('Erro ao criar documento: ' + e.message);
+      }
+    }
+
+    async function atualizarDocumento(collection, id) {
+      const text = document.getElementById(`edit-${id}`).value;
+      try {
+        const doc = JSON.parse(text);
+        const body = buildFirestoreFields(doc);
+        const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/${collection}/${id}`;
+        await fetch(url, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+        alert('Documento atualizado!');
+      } catch (e) {
+        alert('Erro ao atualizar: ' + e.message);
+      }
+    }
+
+    async function deletarDocumento(collection, id) {
+      const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/${collection}/${id}`;
+      await fetch(url, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      listarDocumentos();
+    }
+
+    window.onload = initClient;
+  </script>
+</body>
+</html>
