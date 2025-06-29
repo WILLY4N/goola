@@ -28,6 +28,7 @@
 
   <div id="login">
     <button onclick="handleAuthClick()">Login com Google</button>
+    <button onclick="handleSignoutClick()">Desconectar</button>
     <p id="auth-status">Desconectado</p>
   </div>
 
@@ -123,22 +124,40 @@
 
   <script>
     const CLIENT_ID = '1057061768161-ki1s6p1545rvcq74hs74ffeajfmb4bd3.apps.googleusercontent.com';
+    const PROJECT_ID = 'appgoola';
     let accessToken = null;
 
-    function handleAuthClick() {
+    function initClient() {
       gapi.load('client:auth2', () => {
-        gapi.auth2.init({ client_id: CLIENT_ID }).then(() => {
-          const GoogleAuth = gapi.auth2.getAuthInstance();
-          GoogleAuth.signIn().then(() => {
-            accessToken = GoogleAuth.currentUser.get().getAuthResponse().access_token;
-            document.getElementById("auth-status").innerText = 'Autenticado';
-            document.getElementById("empresaForm").style.display = 'block';
-            carregarDados();
-          });
+        gapi.auth2.init({
+          client_id: CLIENT_ID,
+          scope: 'https://www.googleapis.com/auth/datastore'
+        }).then(() => {
+          const authInstance = gapi.auth2.getAuthInstance();
+          updateSigninStatus(authInstance.isSignedIn.get());
+          authInstance.isSignedIn.listen(updateSigninStatus);
         });
       });
+    }  
+  
+    function updateSigninStatus(isSignedIn) {
+      document.getElementById('auth-status').textContent = 'Status: ' + (isSignedIn ? 'Conectado' : 'Desconectado');
+      if (isSignedIn) {
+        accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
+		document.getElementById("empresaForm").style.display = 'block';
+        carregarDados();		
+      }
+    }
+	
+    function handleAuthClick() {
+      gapi.auth2.getAuthInstance().signIn();
     }
 
+    function handleSignoutClick() {
+      gapi.auth2.getAuthInstance().signOut();
+    }	
+  
+  
     async function carregarDados() {
       await preencherSelect('/ufEstados', 'ufEnderecoEmpresa', 'id');
       await preencherSelect('/categoriaEmpresa', 'categoriaEmpresa', 'id');
@@ -258,6 +277,8 @@
         alert('Erro: ' + JSON.stringify(error));
       }
     });
+	
+	window.onload = initClient;
   </script>
 </body>
 </html>
