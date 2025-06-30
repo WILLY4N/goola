@@ -160,9 +160,9 @@
   
     async function carregarDados() {
       await preencherSelect('/ufEstados', 'ufEnderecoEmpresa', 'id');
-      await preencherSelect('/categoriaEmpresa', 'categoriaEmpresa', 'id');
+      await preencherSelect('/categoriaEmpresa', 'categoriaEmpresa', 'nomeCategoria');
       await preencherSelect('/servicosEmpresa', 'servicoEmpresa', 'nomeServico');
-      await preencherSelect('/usuarios', 'idUsuarioInclusao', 'id');
+      await preencherSelect('/usuarios', 'idUsuarioInclusao', 'nomeUsuario');
 
       document.getElementById('ufEnderecoEmpresa').addEventListener('change', carregarMunicipios);
       document.getElementById('promocaoAtiva').addEventListener('change', () => {
