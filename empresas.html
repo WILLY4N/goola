@@ -196,7 +196,8 @@
       const select = document.getElementById('municipioEnderecoEmpresa');
       select.innerHTML = '';
       data.documents?.forEach(doc => {
-        if (doc.fields.nomeUf?.stringValue === ufId) {
+        <! -- if (doc.fields.nomeUf?.stringValue === ufId) { -->
+        if (doc.fields.nomeUf?.stringValue === 'AM') {
           const id = doc.name.split('/').pop();
           const opt = document.createElement('option');
           opt.value = id;
