@@ -1,285 +1,389 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <title>Cadastro de Empresa - Firestore</title>
-  <script src="https://apis.google.com/js/api.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
-    }
-    h1 { font-size: 1.8rem; }
-    label { display: block; margin-top: 15px; }
-    input, select, textarea {
-      width: 100%; padding: 8px; margin-top: 5px;
-    }
-    .form-row { display: flex; gap: 20px; }
-    .form-row > div { flex: 1; }
-    button {
-      margin-top: 20px; padding: 10px 20px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Cadastro de Nova Empresa</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cadastro de Empresa - Firestore</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 900px;
+        margin: auto;
+        padding: 20px;
+      }
+      h1 {
+        font-size: 1.8rem;
+      }
+      label {
+        display: block;
+        margin-top: 15px;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+      }
+      .form-row {
+        display: flex;
+        gap: 20px;
+      }
+      .form-row > div {
+        flex: 1;
+      }
+      button {
+        margin-top: 20px;
+        padding: 10px 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Cadastro de Nova Empresa</h1>
 
-  <div id="login">
-    <button onclick="handleAuthClick()">Login com Google</button>
-    <button onclick="handleSignoutClick()">Desconectar</button>
-    <p id="auth-status">Desconectado</p>
-  </div>
-
-  <form id="empresaForm" style="display:none;">
-    <label>CNPJ *</label>
-    <input type="text" id="idCnpjEmpresa" maxlength="14" required pattern="\d{14}" placeholder="Somente números" />
-
-    <label>Razão Social *</label>
-    <input type="text" id="razaoSocialEmpresa" required />
-
-    <label>Nome Fantasia *</label>
-    <input type="text" id="nomeFantasiaEmpresa" required />
-
-    <label>Email *</label>
-    <input type="email" id="emailEmpresa" required />
-
-    <div class="form-row">
-      <div>
-        <label>DDD *</label>
-        <input type="text" id="dddTelefoneEmpresa" maxlength="2" pattern="\d{2}" required />
-      </div>
-      <div>
-        <label>Telefone *</label>
-        <input type="text" id="numeroTelefoneEmpresa" maxlength="9" pattern="\d{8,9}" required />
-      </div>
+    <div id="login">
+      <button onclick="handleAuthClick()">Login com Google</button>
+      <button onclick="handleSignoutClick()">Desconectar</button>
+      <p id="auth-status">Desconectado</p>
     </div>
 
-    <label>CEP *</label>
-    <input type="text" id="cepEnderecoEmpresa" maxlength="8" pattern="\d{8}" required />
+    <form id="empresaForm" style="display: none">
+      <label>CNPJ *</label>
+      <input
+        type="text"
+        id="idCnpjEmpresa"
+        maxlength="14"
+        required
+        pattern="\d{14}"
+        placeholder="Somente números"
+      />
 
-    <label>UF *</label>
-    <select id="ufEnderecoEmpresa" required></select>
+      <label>Razão Social *</label>
+      <input type="text" id="razaoSocialEmpresa" required />
 
-    <label>Município *</label>
-    <select id="municipioEnderecoEmpresa" required></select>
+      <label>Nome Fantasia *</label>
+      <input type="text" id="nomeFantasiaEmpresa" required />
 
-    <label>Logradouro *</label>
-    <input type="text" id="logradouroEnderecoEmpresa" required />
+      <label>Email *</label>
+      <input type="email" id="emailEmpresa" required />
 
-    <label>Número *</label>
-    <input type="text" id="numeroEnderecoEmpresa" required />
+      <div class="form-row">
+        <div>
+          <label>DDD *</label>
+          <input
+            type="text"
+            id="dddTelefoneEmpresa"
+            maxlength="2"
+            pattern="\d{2}"
+            required
+          />
+        </div>
+        <div>
+          <label>Telefone *</label>
+          <input
+            type="text"
+            id="numeroTelefoneEmpresa"
+            maxlength="9"
+            pattern="\d{8,9}"
+            required
+          />
+        </div>
+      </div>
 
-    <label>Complemento</label>
-    <input type="text" id="complementoEnderecoEmpresa" />
+      <label>CEP *</label>
+      <input
+        type="text"
+        id="cepEnderecoEmpresa"
+        maxlength="8"
+        pattern="\d{8}"
+        required
+      />
 
-    <label>Bairro *</label>
-    <input type="text" id="bairroEnderecoEmpresa" required />
+      <label>UF *</label>
+      <select id="ufEnderecoEmpresa" required></select>
 
-    <label>Categoria(s) *</label>
-    <select id="categoriaEmpresa" multiple required></select>
+      <label>Município *</label>
+      <select id="municipioEnderecoEmpresa" required></select>
 
-    <label>Serviço(s) *</label>
-    <select id="servicoEmpresa" multiple required></select>
+      <label>Logradouro *</label>
+      <input type="text" id="logradouroEnderecoEmpresa" required />
 
-    <label>URL do Site *</label>
-    <input type="url" id="urlSiteEmpresa" required />
+      <label>Número *</label>
+      <input type="text" id="numeroEnderecoEmpresa" required />
 
-    <label>URL do Ícone *</label>
-    <input type="url" id="urlIconeEmpresa" required />
+      <label>Complemento</label>
+      <input type="text" id="complementoEnderecoEmpresa" />
 
-    <label>Promoção Ativa *</label>
-    <select id="promocaoAtiva" required>
-      <option value="false">NÃO</option>
-      <option value="true">SIM</option>
-    </select>
+      <label>Bairro *</label>
+      <input type="text" id="bairroEnderecoEmpresa" required />
 
-    <label id="labelCupom" style="display:none;">Cupom</label>
-    <input type="text" id="cupomPromocaoAtiva" style="display:none;" />
+      <label>Categoria(s) *</label>
+      <select id="categoriaEmpresa" multiple required></select>
 
-    <label>Aberto Agora *</label>
-    <select id="abertoAgora" required>
-      <option value="false">NÃO</option>
-      <option value="true">SIM</option>
-    </select>
+      <label>Serviço(s) *</label>
+      <select id="servicoEmpresa" multiple required></select>
 
-    <label>Usuário que está incluindo *</label>
-    <select id="idUsuarioInclusao" required></select>
+      <label>URL do Site *</label>
+      <input type="url" id="urlSiteEmpresa" required />
 
-    <label>Empresa Bloqueada *</label>
-    <select id="empresaBloqueada" required>
-      <option value="false">NÃO</option>
-      <option value="true">SIM</option>
-    </select>
+      <label>URL do Ícone *</label>
+      <input type="url" id="urlIconeEmpresa" required />
 
-    <label>Empresa Excluída *</label>
-    <select id="empresaExcluida" required>
-      <option value="false">NÃO</option>
-      <option value="true">SIM</option>
-    </select>
+      <label>Promoção Ativa *</label>
+      <select id="promocaoAtiva" required>
+        <option value="false">NÃO</option>
+        <option value="true">SIM</option>
+      </select>
 
-    <button type="submit">Salvar Empresa</button>
-  </form>
+      <label id="labelCupom" style="display: none">Cupom</label>
+      <input type="text" id="cupomPromocaoAtiva" style="display: none" />
 
-  <script>
-    const CLIENT_ID = '1057061768161-ki1s6p1545rvcq74hs74ffeajfmb4bd3.apps.googleusercontent.com';
-    const PROJECT_ID = 'appgoola';
-    let accessToken = null;
+      <label>Aberto Agora *</label>
+      <select id="abertoAgora" required>
+        <option value="false">NÃO</option>
+        <option value="true">SIM</option>
+      </select>
 
-    function initClient() {
-      gapi.load('client:auth2', () => {
-        gapi.auth2.init({
-          client_id: CLIENT_ID,
-          scope: 'https://www.googleapis.com/auth/datastore'
-        }).then(() => {
-          const authInstance = gapi.auth2.getAuthInstance();
-          updateSigninStatus(authInstance.isSignedIn.get());
-          authInstance.isSignedIn.listen(updateSigninStatus);
+      <label>Usuário que está incluindo *</label>
+      <select id="idUsuarioInclusao" required></select>
+
+      <label>Empresa Bloqueada *</label>
+      <select id="empresaBloqueada" required>
+        <option value="false">NÃO</option>
+        <option value="true">SIM</option>
+      </select>
+
+      <label>Empresa Excluída *</label>
+      <select id="empresaExcluida" required>
+        <option value="false">NÃO</option>
+        <option value="true">SIM</option>
+      </select>
+
+      <button type="submit">Salvar Empresa</button>
+    </form>
+
+    <script>
+      const CLIENT_ID =
+        "1057061768161-ki1s6p1545rvcq74hs74ffeajfmb4bd3.apps.googleusercontent.com";
+      const PROJECT_ID = "appgoola";
+      let accessToken = null;
+
+      function initClient() {
+        gapi.load("client:auth2", () => {
+          gapi.auth2
+            .init({
+              client_id: CLIENT_ID,
+              scope: "https://www.googleapis.com/auth/datastore",
+            })
+            .then(() => {
+              const authInstance = gapi.auth2.getAuthInstance();
+              updateSigninStatus(authInstance.isSignedIn.get());
+              authInstance.isSignedIn.listen(updateSigninStatus);
+            });
         });
-      });
-    }  
-  
-    function updateSigninStatus(isSignedIn) {
-      document.getElementById('auth-status').textContent = 'Status: ' + (isSignedIn ? 'Conectado' : 'Desconectado');
-      if (isSignedIn) {
-        accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
-		document.getElementById("empresaForm").style.display = 'block';
-        carregarDados();		
       }
-    }
-	
-    function handleAuthClick() {
-      gapi.auth2.getAuthInstance().signIn();
-    }
 
-    function handleSignoutClick() {
-      gapi.auth2.getAuthInstance().signOut();
-    }	
-  
-  
-    async function carregarDados() {
-      await preencherSelect('/ufEstados', 'ufEnderecoEmpresa', 'id');
-      await preencherSelect('/categoriaEmpresa', 'categoriaEmpresa', 'nomeCategoria');
-      await preencherSelect('/servicosEmpresa', 'servicoEmpresa', 'nomeServico');
-      await preencherSelect('/usuarios', 'idUsuarioInclusao', 'nomeUsuario');
+      function updateSigninStatus(isSignedIn) {
+        document.getElementById("auth-status").textContent =
+          "Status: " + (isSignedIn ? "Conectado" : "Desconectado");
+        if (isSignedIn) {
+          accessToken = gapi.auth2
+            .getAuthInstance()
+            .currentUser.get()
+            .getAuthResponse().access_token;
+          document.getElementById("empresaForm").style.display = "block";
+          carregarDados();
+        }
+      }
 
-      document.getElementById('ufEnderecoEmpresa').addEventListener('change', carregarMunicipios);
-      document.getElementById('promocaoAtiva').addEventListener('change', () => {
-        const ativo = document.getElementById('promocaoAtiva').value === 'true';
-        document.getElementById('labelCupom').style.display = ativo ? 'block' : 'none';
-        document.getElementById('cupomPromocaoAtiva').style.display = ativo ? 'block' : 'none';
-      });
-    }
+      function handleAuthClick() {
+        gapi.auth2.getAuthInstance().signIn();
+      }
 
-    async function preencherSelect(collection, id, labelField) {
-      const res = await fetch(`https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents${collection}`, {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      const data = await res.json();
-      const select = document.getElementById(id);
-      data.documents?.forEach(doc => {
-        const opt = document.createElement('option');
-        const docId = doc.name.split('/').pop();
-        opt.value = docId;
-        opt.textContent = doc.fields[labelField]?.stringValue || docId;
-        select.appendChild(opt);
-      });
-    }
+      function handleSignoutClick() {
+        gapi.auth2.getAuthInstance().signOut();
+      }
 
-    async function carregarMunicipios() {
-      const ufId = document.getElementById('ufEnderecoEmpresa').value;
-      const res = await fetch(`https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents/municipiosUf`, {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      const data = await res.json();
-      const select = document.getElementById('municipioEnderecoEmpresa');
-      select.innerHTML = '';
-      data.documents?.forEach(doc => {
-        // if (doc.fields.nomeUf?.stringValue === ufId) {
-        if (doc.fields.nomeUf?.stringValue === 'AM') {
-          const id = doc.name.split('/').pop();
-          const opt = document.createElement('option');
-          opt.value = id;
-          opt.textContent = doc.fields.nomeMunicipio.stringValue;
+      async function carregarDados() {
+        await preencherSelect("/ufEstados", "ufEnderecoEmpresa", "nomeUf");
+        await preencherSelect(
+          "/categoriaEmpresa",
+          "categoriaEmpresa",
+          "nomeCategoria"
+        );
+        await preencherSelect(
+          "/servicosEmpresa",
+          "servicoEmpresa",
+          "nomeServico"
+        );
+        await preencherSelect("/usuarios", "idUsuarioInclusao", "nomeUsuario");
+
+        document
+          .getElementById("ufEnderecoEmpresa")
+          .addEventListener("change", carregarMunicipios);
+        document
+          .getElementById("promocaoAtiva")
+          .addEventListener("change", () => {
+            const ativo =
+              document.getElementById("promocaoAtiva").value === "true";
+            document.getElementById("labelCupom").style.display = ativo
+              ? "block"
+              : "none";
+            document.getElementById("cupomPromocaoAtiva").style.display = ativo
+              ? "block"
+              : "none";
+          });
+      }
+
+      async function preencherSelect(collection, id, labelField) {
+        const res = await fetch(
+          `https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents${collection}`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+        const data = await res.json();
+        const select = document.getElementById(id);
+        data.documents?.forEach((doc) => {
+          const opt = document.createElement("option");
+          const docId = doc.name.split("/").pop();
+          opt.value = docId;
+          opt.textContent = doc.fields[labelField]?.stringValue || docId;
           select.appendChild(opt);
-        }
-      });
-    }
-
-    document.getElementById('empresaForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const f = e.target;
-      const get = id => f[id]?.value || null;
-      const ref = (path, id) => ({ referenceValue: `projects/appgoola/databases/(default)/documents${path}/${id}` });
-      const mapRefs = (id, path) => {
-        const map = {};
-        [...f[id].selectedOptions].forEach((o, i) => map[i] = `${path}/${o.value}`);
-        return { mapValue: { fields: map } };
-      };
-      const municipioId = get('municipioEnderecoEmpresa');
-      const munRes = await fetch(`https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents/municipiosUf/${municipioId}`, {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      const munDoc = await munRes.json();
-      const ibge = munDoc.fields?.idMunicipioIbge?.stringValue || '';
-
-      const payload = {
-        fields: {
-          idCnpjEmpresa: { stringValue: get('idCnpjEmpresa') },
-          razaoSocialEmpresa: { stringValue: get('razaoSocialEmpresa') },
-          nomeFantasiaEmpresa: { stringValue: get('nomeFantasiaEmpresa') },
-          emailEmpresa: { stringValue: get('emailEmpresa') },
-          dddTelefoneEmpresa: { integerValue: get('dddTelefoneEmpresa') },
-          numeroTelefoneEmpresa: { integerValue: get('numeroTelefoneEmpresa') },
-          cepEnderecoEmpresa: { stringValue: get('cepEnderecoEmpresa') },
-          ufEnderecoEmpresa: ref('/ufEstados', get('ufEnderecoEmpresa')),
-          municipioEnderecoEmpresa: ref('/municipiosUf', municipioId),
-          idMunicipioIbgeEnderecoEmpresa: { stringValue: ibge },
-          logradouroEnderecoEmpresa: { stringValue: get('logradouroEnderecoEmpresa') },
-          numeroEnderecoEmpresa: { stringValue: get('numeroEnderecoEmpresa') },
-          complementoEnderecoEmpresa: get('complementoEnderecoEmpresa') ? { stringValue: get('complementoEnderecoEmpresa') } : { nullValue: null },
-          bairroEnderecoEmpresa: { stringValue: get('bairroEnderecoEmpresa') },
-          categoriaEmpresa: mapRefs('categoriaEmpresa', '/categoriaEmpresa'),
-          servicoEmpresa: mapRefs('servicoEmpresa', '/servicosEmpresa'),
-          urlSiteEmpresa: { stringValue: get('urlSiteEmpresa') },
-          urlIconeEmpresa: { stringValue: get('urlIconeEmpresa') },
-          promocaoAtiva: { booleanValue: get('promocaoAtiva') === 'true' },
-          cupomPromocaoAtiva: get('promocaoAtiva') === 'true' ? { stringValue: get('cupomPromocaoAtiva') } : { nullValue: null },
-          abertoAgora: { booleanValue: get('abertoAgora') === 'true' },
-          dataInclusaoEmpresa: { timestampValue: new Date(new Date().getTime() - 3 * 60 * 60 * 1000).toISOString() },
-          idUsuarioInclusao: ref('/usuarios', get('idUsuarioInclusao')),
-          empresaBloqueada: { booleanValue: get('empresaBloqueada') === 'true' },
-          empresaExcluida: { booleanValue: get('empresaExcluida') === 'true' },
-          idCpfAdminEmpresa: { nullValue: null },
-          idCpfUsuarioEmpresa: { nullValue: null },
-          dataBloqueioEmpresa: { nullValue: null },
-          dataExclusaoEmpresa: { nullValue: null },
-          dataAlteracaoCadastroEmpresa: { nullValue: null },
-          idUsuarioAlteracao: { nullValue: null },
-          idUsuarioIndicacao: { nullValue: null }
-        }
-      };
-
-      const res = await fetch(`https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents/empresas`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (res.ok) {
-        alert('Empresa cadastrada com sucesso!');
-        f.reset();
-      } else {
-        const error = await res.json();
-        alert('Erro: ' + JSON.stringify(error));
+        });
       }
-    });
-	
-	window.onload = initClient;
-  </script>
-</body>
+
+      async function carregarMunicipios() {
+        const ufId = document.getElementById("ufEnderecoEmpresa").value;
+        const res = await fetch(
+          `https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents/municipiosUf`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+        const data = await res.json();
+        const select = document.getElementById("municipioEnderecoEmpresa");
+        select.innerHTML = "";
+        data.documents?.forEach((doc) => {
+          if (doc.fields.nomeUf?.stringValue === ufId) {
+            const id = doc.name.split("/").pop();
+            const opt = document.createElement("option");
+            opt.value = id;
+            opt.textContent = doc.fields.nomeMunicipio.stringValue;
+            select.appendChild(opt);
+          }
+        });
+      }
+
+      document
+        .getElementById("empresaForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const f = e.target;
+          const get = (id) => f[id]?.value || null;
+          const ref = (path, id) => ({
+            referenceValue: `projects/appgoola/databases/(default)/documents${path}/${id}`,
+          });
+          const mapRefs = (id, path) => {
+            const map = {};
+            [...f[id].selectedOptions].forEach(
+              (o, i) => (map[i] = `${path}/${o.value}`)
+            );
+            return { mapValue: { fields: map } };
+          };
+          const municipioId = get("municipioEnderecoEmpresa");
+          const munRes = await fetch(
+            `https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents/municipiosUf/${municipioId}`,
+            {
+              headers: { Authorization: `Bearer ${accessToken}` },
+            }
+          );
+          const munDoc = await munRes.json();
+          const ibge = munDoc.fields?.idMunicipioIbge?.stringValue || "";
+
+          const payload = {
+            fields: {
+              idCnpjEmpresa: { stringValue: get("idCnpjEmpresa") },
+              razaoSocialEmpresa: { stringValue: get("razaoSocialEmpresa") },
+              nomeFantasiaEmpresa: { stringValue: get("nomeFantasiaEmpresa") },
+              emailEmpresa: { stringValue: get("emailEmpresa") },
+              dddTelefoneEmpresa: { integerValue: get("dddTelefoneEmpresa") },
+              numeroTelefoneEmpresa: {
+                integerValue: get("numeroTelefoneEmpresa"),
+              },
+              cepEnderecoEmpresa: { stringValue: get("cepEnderecoEmpresa") },
+              ufEnderecoEmpresa: ref("/ufEstados", get("ufEnderecoEmpresa")),
+              municipioEnderecoEmpresa: ref("/municipiosUf", municipioId),
+              idMunicipioIbgeEnderecoEmpresa: { stringValue: ibge },
+              logradouroEnderecoEmpresa: {
+                stringValue: get("logradouroEnderecoEmpresa"),
+              },
+              numeroEnderecoEmpresa: {
+                stringValue: get("numeroEnderecoEmpresa"),
+              },
+              complementoEnderecoEmpresa: get("complementoEnderecoEmpresa")
+                ? { stringValue: get("complementoEnderecoEmpresa") }
+                : { nullValue: null },
+              bairroEnderecoEmpresa: {
+                stringValue: get("bairroEnderecoEmpresa"),
+              },
+              categoriaEmpresa: mapRefs(
+                "categoriaEmpresa",
+                "/categoriaEmpresa"
+              ),
+              servicoEmpresa: mapRefs("servicoEmpresa", "/servicosEmpresa"),
+              urlSiteEmpresa: { stringValue: get("urlSiteEmpresa") },
+              urlIconeEmpresa: { stringValue: get("urlIconeEmpresa") },
+              promocaoAtiva: { booleanValue: get("promocaoAtiva") === "true" },
+              cupomPromocaoAtiva:
+                get("promocaoAtiva") === "true"
+                  ? { stringValue: get("cupomPromocaoAtiva") }
+                  : { nullValue: null },
+              abertoAgora: { booleanValue: get("abertoAgora") === "true" },
+              dataInclusaoEmpresa: {
+                timestampValue: new Date(
+                  new Date().getTime() - 3 * 60 * 60 * 1000
+                ).toISOString(),
+              },
+              idUsuarioInclusao: ref("/usuarios", get("idUsuarioInclusao")),
+              empresaBloqueada: {
+                booleanValue: get("empresaBloqueada") === "true",
+              },
+              empresaExcluida: {
+                booleanValue: get("empresaExcluida") === "true",
+              },
+              idCpfAdminEmpresa: { nullValue: null },
+              idCpfUsuarioEmpresa: { nullValue: null },
+              dataBloqueioEmpresa: { nullValue: null },
+              dataExclusaoEmpresa: { nullValue: null },
+              dataAlteracaoCadastroEmpresa: { nullValue: null },
+              idUsuarioAlteracao: { nullValue: null },
+              idUsuarioIndicacao: { nullValue: null },
+            },
+          };
+
+          const res = await fetch(
+            `https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents/empresas`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
+            }
+          );
+
+          if (res.ok) {
+            alert("Empresa cadastrada com sucesso!");
+            f.reset();
+          } else {
+            const error = await res.json();
+            alert("Erro: " + JSON.stringify(error));
+          }
+        });
+
+      window.onload = initClient;
+    </script>
+  </body>
 </html>
