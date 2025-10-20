@@ -255,24 +255,57 @@
 
       async function carregarMunicipios() {
         const ufId = document.getElementById("ufEnderecoEmpresa").value;
-        const res = await fetch(
-          `https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents/municipiosUf`,
-          {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }
-        );
-        const data = await res.json();
         const select = document.getElementById("municipioEnderecoEmpresa");
         select.innerHTML = "";
-        data.documents?.forEach((doc) => {
-          if (doc.fields.nomeUf?.stringValue === ufId) {
-            const id = doc.name.split("/").pop();
-            const opt = document.createElement("option");
-            opt.value = id;
-            opt.textContent = doc.fields.nomeMunicipio.stringValue;
-            select.appendChild(opt);
+
+        const baseUrl = `https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents/municipiosUf`;
+        let allDocuments = [];
+        let nextPageToken = null;
+
+        try {
+          do {
+            const url = nextPageToken
+              ? `${baseUrl}?pageToken=${nextPageToken}`
+              : baseUrl;
+
+            const res = await fetch(url, {
+              headers: { Authorization: `Bearer ${accessToken}` },
+            });
+
+            if (!res.ok) {
+              console.error("Erro ao buscar municípios:", res.statusText);
+              return;
+            }
+
+            const data = await res.json();
+            nextPageToken = data.nextPageToken || null;
+
+            if (data.documents) {
+              allDocuments = allDocuments.concat(data.documents);
+            }
+          } while (nextPageToken);
+
+          let count = 0;
+          allDocuments.forEach((doc) => {
+            const nomeUf = doc.fields.nomeUf?.stringValue;
+            const nomeMunicipio = doc.fields.nomeMunicipio?.stringValue;
+
+            if (nomeUf === ufId) {
+              const id = doc.name.split("/").pop();
+              const opt = document.createElement("option");
+              opt.value = id;
+              opt.textContent = nomeMunicipio;
+              select.appendChild(opt);
+              count++;
+            }
+          });
+
+          if (count === 0) {
+            console.warn(`Nenhum município encontrado para a UF: ${ufId}`);
           }
-        });
+        } catch (err) {
+          console.error("Erro ao carregar municípios:", err);
+        }
       }
 
       document
