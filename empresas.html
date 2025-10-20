@@ -258,11 +258,31 @@
         const select = document.getElementById("municipioEnderecoEmpresa");
         select.innerHTML = "";
 
-        const baseUrl = `https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents/municipiosUf`;
-        let allDocuments = [];
-        let nextPageToken = null;
-
         try {
+          const ufRes = await fetch(
+            `https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents/ufEstados/${ufId}`,
+            {
+              headers: { Authorization: `Bearer ${accessToken}` },
+            }
+          );
+
+          if (!ufRes.ok) {
+            console.error("Erro ao buscar nome da UF:", ufRes.statusText);
+            return;
+          }
+
+          const ufDoc = await ufRes.json();
+          const nomeUfSelecionada = ufDoc.fields?.nomeUf?.stringValue;
+
+          if (!nomeUfSelecionada) {
+            console.warn("Nome da UF não encontrado no documento.");
+            return;
+          }
+
+          const baseUrl = `https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents/municipiosUf`;
+          let allDocuments = [];
+          let nextPageToken = null;
+
           do {
             const url = nextPageToken
               ? `${baseUrl}?pageToken=${nextPageToken}`
@@ -290,7 +310,7 @@
             const nomeUf = doc.fields.nomeUf?.stringValue;
             const nomeMunicipio = doc.fields.nomeMunicipio?.stringValue;
 
-            if (nomeUf === ufId) {
+            if (nomeUf === nomeUfSelecionada) {
               const id = doc.name.split("/").pop();
               const opt = document.createElement("option");
               opt.value = id;
@@ -301,7 +321,9 @@
           });
 
           if (count === 0) {
-            console.warn(`Nenhum município encontrado para a UF: ${ufId}`);
+            console.warn(
+              `Nenhum município encontrado para a UF: ${nomeUfSelecionada}`
+            );
           }
         } catch (err) {
           console.error("Erro ao carregar municípios:", err);
