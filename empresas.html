@@ -335,19 +335,30 @@
             }
           } while (nextPageToken);
 
-          let count = 0;
-          allDocuments.forEach((doc) => {
-            const nomeUf = doc.fields.nomeUf?.stringValue;
-            const nomeMunicipio = doc.fields.nomeMunicipio?.stringValue;
+          const municipiosFiltrados = allDocuments
+            .filter(
+              (doc) => doc.fields.nomeUf?.stringValue === nomeUfSelecionada
+            )
+            .map((doc) => ({
+              id: doc.name.split("/").pop(),
+              nome: doc.fields.nomeMunicipio?.stringValue || "Sem Nome",
+            }))
+            .sort((a, b) =>
+              a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+            );
 
-            if (nomeUf === nomeUfSelecionada) {
-              const id = doc.name.split("/").pop();
-              const opt = document.createElement("option");
-              opt.value = id;
-              opt.textContent = nomeMunicipio;
-              select.appendChild(opt);
-              count++;
-            }
+          const defaultOption = document.createElement("option");
+          defaultOption.disabled = true;
+          defaultOption.selected = true;
+          defaultOption.value = "";
+          defaultOption.textContent = "Escolha um Município";
+          select.appendChild(defaultOption);
+
+          municipiosFiltrados.forEach((m) => {
+            const opt = document.createElement("option");
+            opt.value = m.id;
+            opt.textContent = m.nome;
+            select.appendChild(opt);
           });
 
           if (count === 0) {
