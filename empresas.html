@@ -205,7 +205,13 @@
       }
 
       async function carregarDados() {
-        await preencherSelect("/ufEstados", "ufEnderecoEmpresa", "nomeUf");
+        await preencherSelect(
+          "/ufEstados",
+          "ufEnderecoEmpresa",
+          "nomeUf",
+          true,
+          "Escolha uma UF"
+        );
         await preencherSelect(
           "/categoriaEmpresa",
           "categoriaEmpresa",
@@ -235,16 +241,40 @@
           });
       }
 
-      async function preencherSelect(collection, id, labelField) {
+      async function preencherSelect(
+        collection,
+        id,
+        labelField,
+        includeDefaultOption = false,
+        defaultText = "Selecione"
+      ) {
         const res = await fetch(
           `https://firestore.googleapis.com/v1/projects/appgoola/databases/(default)/documents${collection}`,
           {
             headers: { Authorization: `Bearer ${accessToken}` },
           }
         );
+
         const data = await res.json();
         const select = document.getElementById(id);
-        data.documents?.forEach((doc) => {
+        select.innerHTML = "";
+
+        if (includeDefaultOption) {
+          const defaultOption = document.createElement("option");
+          defaultOption.disabled = true;
+          defaultOption.selected = true;
+          defaultOption.value = "";
+          defaultOption.textContent = defaultText;
+          select.appendChild(defaultOption);
+        }
+
+        const docsOrdenados = (data.documents || []).sort((a, b) => {
+          const nomeA = a.fields[labelField]?.stringValue || "";
+          const nomeB = b.fields[labelField]?.stringValue || "";
+          return nomeA.localeCompare(nomeB, "pt-BR", { sensitivity: "base" });
+        });
+
+        docsOrdenados.forEach((doc) => {
           const opt = document.createElement("option");
           const docId = doc.name.split("/").pop();
           opt.value = docId;
