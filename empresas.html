@@ -341,9 +341,11 @@
           });
           const mapRefs = (id, path) => {
             const map = {};
-            [...f[id].selectedOptions].forEach(
-              (o, i) => (map[i] = `${path}/${o.value}`)
-            );
+            [...f[id].selectedOptions].forEach((o, i) => {
+              map[i] = {
+                referenceValue: `projects/appgoola/databases/(default)/documents${path}/${o.value}`,
+              };
+            });
             return { mapValue: { fields: map } };
           };
           const municipioId = get("municipioEnderecoEmpresa");
